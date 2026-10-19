@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISKOLA — Tanulmányi Osztály</title>
+
+    <!-- Lekerekített Piros-Fehér Pecsét Favicon (SVG) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23C8102E'/><circle cx='50' cy='50' r='28' fill='none' stroke='%23FFFFFF' stroke-width='8'/><circle cx='50' cy='50' r='10' fill='%23FFFFFF'/></svg>">
+
+    <!-- Betűtípusok: Fraunces (Karakteres Editorial Serif), Plus Jakarta Sans (Tiszta UI), Space Mono (Időpontok/Címkék) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --white: #ffffff;
+            --cream: #fff9f8;
+            --red: #c8102e;         /* Elegáns, mély kárminpiros */
+            --red-bright: #e01a38;
+            --red-dark: #7a091b;
+            --red-tint: #fceef0;    /* Halvány rózsás-piros kártya háttér */
+            --red-border: rgba(200, 16, 46, 0.16);
+            --radius-xl: 36px;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-pill: 999px;
+            --spring: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background-color: var(--cream);
+            color: var(--red-dark);
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        body {
+            overflow-x: hidden;
+            padding-top: 100px;
+        }
+
+        .serif {
+            font-family: 'Fraunces', serif;
+            font-variation-settings: "SOFT" 50;
+        }
+
+        .mono {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .wrapper {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* ================= LEBEGŐ KAPSZULA NAVIGÁCIÓ ================= */
+        .floating-nav-wrap {
+            position: fixed;
+            top: 1.25rem;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            padding: 0 1rem;
+            pointer-events: none;
+        }
+
+        .floating-nav {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--red-border);
+            box-shadow: 0 12px 32px -8px rgba(200, 16, 46, 0.12);
+            border-radius: var(--radius-pill);
+            padding: 0.5rem 0.6rem 0.5rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            transition: transform 0.4s var(--spring), box-shadow 0.4s var(--spring);
+        }
+
+        .floating-nav:hover {
+            box-shadow: 0 16px 40px -8px rgba(200, 16, 46, 0.2);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: var(--red);
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--red);
+            display: inline-block;
+            box-shadow: 0 0 0 4px var(--red-tint);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--red-dark);
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-pill);
+            transition: background 0.25s, color 0.25s;
+        }
+
+        .nav-menu a:hover {
+            background: var(--red-tint);
+            color: var(--red);
+        }
+
+        .live-badge {
+            background: var(--red);
+            color: var(--white);
+            padding: 0.55rem 1.1rem;
+            border-radius: var(--radius-pill);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+        }
+
+        .live-indicator {
+            width: 7px;
+            height: 7px;
+            background: var(--white);
+            border-radius: 50%;
+            animation: blink 1.8s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ================= BENTO HERO SECTION ================= */
+        .hero-section {
+            padding: 1.5rem 0 4rem;
+        }
+
+        .hero-bento {
+            display: grid;
+            grid-template-columns: 1.05fr 1.25fr;
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+
+        /* Bal oldali szöveges kártya */
+        .hero-card {
+            background: var(--white);
+            border: 1px solid var(--red-border);
+            border-radius: var(--radius-xl);
+            padding: 3.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px -20px rgba(200, 16, 46, 0.08);
+        }
+
+        /* Finom dekoratív kör a kártya sarkában */
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            right: -80px;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: var(--red-tint);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .hero-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .tag-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+        }
+
+        .pill-tag {
+            background: var(--red-tint);
+            color: var(--red);
+            padding: 0.4rem 0.9rem;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+        }
+
+        .hero-title {
+            font-size: clamp(2.6rem, 4.5vw, 4.2rem);
+            line-height: 1.02;
+            color: var(--red);
+            letter-spacing: -0.03em;
+            margin-bottom: 1.25rem;
+        }
+
+        .hero-title em {
+            font-style: italic;
+            font-weight: 400;
+            color: var(--red-dark);
+        }
+
+        .hero-desc {
+            font-size: 1.08rem;
+            line-height: 1.6;
+            color: var(--red-dark);
+            opacity: 0.85;
+            max-width: 420px;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 2rem;
+            border-top: 1px dashed var(--red-border);
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            background: var(--red);
+            color: var(--white);
+            text-decoration: none;
+            padding: 1rem 1.75rem;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: transform 0.3s var(--spring), background 0.3s;
+        }
+
+        .cta-btn:hover {
+            background: var(--red-dark);
+            transform: translateY(-3px);
+        }
+
+        .cta-btn svg {
+            transition: transform 0.3s var(--spring);
+        }
+
+        .cta-btn:hover svg {
+            transform: translateX(4px);
+        }
+
+        /* Jobb oldali 3 képes interaktív harmonika-galéria */
+        .photo-deck {
+            display: flex;
+            gap: 1rem;
+            height: 540px;
+        }
+
+        .deck-card {
+            flex: 1;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            background: var(--red);
+            border: 1px solid var(--red-border);
+            transition: flex 0.7s var(--spring), transform 0.4s var(--spring);
+        }
+
+        .deck-card.active {
+            flex: 2.8;
+        }
+
+        .deck-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s var(--spring), filter 0.6s;
+            filter: grayscale(100%) contrast(1.1);
+            mix-blend-mode: luminosity;
+            opacity: 0.9;
+        }
+
+        .deck-card.active img,
+        .deck-card:hover img {
+            filter: grayscale(0%) contrast(1);
+            mix-blend-mode: normal;
+            opacity: 1;
+            transform: scale(1.03);
+        }
+
+        /* Piros színátmenet a kép alján, hogy a fehér szöveg mindig olvasható legyen */
+        .deck-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(122, 9, 27, 0.9) 0%, rgba(200, 16, 46, 0.15) 55%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 1.75rem;
+            color: var(--white);
+        }
+
+        .deck-num {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: auto;
+            font-weight: 700;
+        }
+
+        .deck-info {
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .deck-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s 0.1s, transform 0.4s 0.1s var(--spring);
+        }
+
+        .deck-info span {
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.4s 0.15s;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .deck-card.active .deck-info h3,
+        .deck-card.active .deck-info span {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ================= PIROS SZÍNPADI NYITVATARTÁS ================= */
+        .hours-stage-wrap {
+            padding: 1rem 0 4rem;
+        }
+
+        .hours-stage {
+            background: var(--red);
+            color: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 4rem 3.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 30px 60px -20px rgba(200, 16, 46, 0.35);
+        }
+
+        /* Finom háttér-rács minta a piros blokkon belül */
+        .hours-stage::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+        }
+
+        .stage-top {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 3rem;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stage-title-group .mono {
+            color: rgba(255, 255, 255, 0.75);
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+
+        .stage-title {
+            font-size: clamp(2.2rem, 4vw, 3.4rem);
+            line-height: 1.05;
+        }
+
+        .stage-clock-box {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 0.9rem 1.4rem;
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(8px);
+            text-align: right;
+        }
+
+        .stage-clock-box .clock-time {
+            font-size: 1.35rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        /* 7 napos Bento kártya-rács */
+        .days-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.1rem;
+        }
+
+        .day-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: var(--radius-lg);
+            padding: 1.6rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 165px;
+            backdrop-filter: blur(6px);
+            transition: transform 0.35s var(--spring), background 0.35s;
+        }
+
+        .day-card:hover {
+            transform: translateY(-6px);
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        /* A MAI NAP kártyája hófehér lesz piros szöveggel */
+        .day-card.is-today {
+            background: var(--white);
+            color: var(--red);
+            border-color: var(--white);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            transform: translateY(-6px) scale(1.02);
+        }
+
+        .day-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .day-label {
+            font-weight: 700;
+            font-size: 1.15rem;
+        }
+
+        .today-chip {
+            display: none;
+            background: var(--red);
+            color: var(--white);
+            padding: 0.2rem 0.65rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+
+        .day-card.is-today .today-chip {
+            display: inline-block;
+        }
+
+        .day-hours {
+            font-size: 1.45rem;
+            font-weight: 700;
+            margin: 1rem 0 0.35rem;
+            letter-spacing: -0.02em;
+        }
+
+        .day-note {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Hétvége összevont kártya */
+        .day-card.weekend-card {
+            grid-column: span 2;
+            background: rgba(0, 0, 0, 0.15);
+            border-style: dashed;
+        }
+
+        .day-card.weekend-card.is-today {
+            background: var(--white);
+            border-style: solid;
+        }
+
+        /* ================= KÁRTYÁS GYAKORI KÉRDÉSEK (FAQ) ================= */
+        .faq-section {
+            padding: 3rem 0 6rem;
+        }
+
+        .faq-header {
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto 3.5rem;
+        }
+
+        .faq-header h2 {
+            font-size: clamp(2.2rem, 3.8vw, 3.2rem);
+            color: var(--red);
+            margin-top: 0.75rem;
+        }
+
+        .faq-bento {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+            align-items: start;
+        }
+
+        .faq-card {
+            background: var(--white);
+            border: 1.5px solid var(--red-border);
+            border-radius: var(--radius-lg);
+            padding: 0 1.75rem;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s var(--spring);
+        }
+
+        .faq-card:hover {
+            border-color: var(--red);
+            transform: translateY(-2px);
+        }
+
+        .faq-card.open {
+            border-color: var(--red);
+            box-shadow: 0 18px 40px -15px rgba(200, 16, 46, 0.14);
+        }
+
+        .faq-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 1.65rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            text-align: left;
+            cursor: pointer;
+            color: var(--red-dark);
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .faq-num {
+            background: var(--red-tint);
+            color: var(--red);
+            padding: 0.3rem 0.65rem;
+            border-radius: 8px;
+            margin-right: 0.85rem;
+            flex-shrink: 0;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .faq-card.open .faq-num {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .faq-q-text {
+            flex: 1;
+        }
+
+        .faq-plus {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--red-tint);
+            color: var(--red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            transition: transform 0.4s var(--spring), background 0.3s, color 0.3s;
+        }
+
+        .faq-card.open .faq-plus {
+            transform: rotate(45deg);
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .faq-body-wrap {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.45s var(--spring);
+        }
+
+        .faq-card.open .faq-body-wrap {
+            grid-template-rows: 1fr;
+        }
+
+        .faq-body {
+            overflow: hidden;
+        }
+
+        .faq-body p {
+            padding-bottom: 1.65rem;
+            color: var(--red-dark);
+            opacity: 0.85;
+            line-height: 1.65;
+            font-size: 0.98rem;
+            border-top: 1px solid var(--red-tint);
+            padding-top: 1rem;
+        }
+
+        /* ================= LÁBLÉC ================= */
+        footer {
+            padding: 2rem 0 3rem;
+        }
+
+        .footer-pill {
+            background: var(--white);
+            border: 1px solid var(--red-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 2.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 800;
+            color: var(--red);
+        }
+
+        .cookie-reopen {
+            background: var(--red-tint);
+            color: var(--red);
+            border: none;
+            padding: 0.55rem 1.1rem;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.25s, color 0.25s;
+        }
+
+        .cookie-reopen:hover {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        /* ================= LEBEGŐ COOKIE (SÜTI) KÁRTYA ================= */
+        .cookie-modal {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translate(-50%, 150%);
+            width: calc(100% - 2rem);
+            max-width: 620px;
+            background: var(--white);
+            border: 2px solid var(--red);
+            border-radius: var(--radius-lg);
+            padding: 1.4rem 1.75rem;
+            z-index: 9999;
+            box-shadow: 0 25px 60px -10px rgba(122, 9, 27, 0.28);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            transition: transform 0.6s var(--spring);
+        }
+
+        .cookie-modal.visible {
+            transform: translate(-50%, 0);
+        }
+
+        .cookie-icon-badge {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: var(--red);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: 700;
+        }
+
+        .cookie-text h4 {
+            color: var(--red);
+            font-size: 0.98rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .cookie-text p {
+            font-size: 0.85rem;
+            line-height: 1.45;
+            color: var(--red-dark);
+            opacity: 0.85;
+        }
+
+        .cookie-btns {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .c-btn {
+            padding: 0.7rem 1.15rem;
+            border-radius: var(--radius-pill);
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .c-btn-accept {
+            background: var(--red);
+            color: var(--white);
+            border: 1.5px solid var(--red);
+        }
+
+        .c-btn-accept:hover {
+            background: var(--red-dark);
+            transform: scale(1.03);
+        }
+
+        .c-btn-decline {
+            background: var(--red-tint);
+            color: var(--red);
+            border: 1.5px solid transparent;
+        }
+
+        .c-btn-decline:hover {
+            border-color: var(--red);
+        }
+
+        /* Görgetési animáció segédosztály */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.8s var(--spring), transform 0.8s var(--spring);
+        }
+
+        .fade-up.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ================= RESZPONZIVITÁS ================= */
+        @media (max-width: 1024px) {
+            .hero-bento {
+                grid-template-columns: 1fr;
+            }
+            .photo-deck {
+                height: 400px;
+            }
+            .days-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .faq-bento {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .nav-menu {
+                display: none;
+            }
+            .hero-card {
+                padding: 2rem;
+            }
+            .photo-deck {
+                flex-direction: column;
+                height: 520px;
+            }
+            .hours-stage {
+                padding: 2.25rem 1.5rem;
+            }
+            .days-grid {
+                grid-template-columns: 1fr;
+            }
+            .day-card.weekend-card {
+                grid-column: span 1;
+            }
+            .cookie-modal {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1.25rem;
+            }
+            .cookie-btns {
+                width: 100%;
+            }
+            .c-btn {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LEBEGŐ KAPSZULA NAVIGÁCIÓ -->
+    <div class="floating-nav-wrap">
+        <nav class="floating-nav">
+            <a href="#" class="nav-brand">
+                <span class="nav-dot"></span>
+                ISKOLA
+            </a>
+            <div class="nav-menu">
+                <a href="#nyitvatartas">Nyitvatartás</a>
+                <a href="#kerdesek">Gyakori kérdések</a>
+            </div>
+            <div class="live-badge mono">
+                <span class="live-indicator"></span>
+                <span id="nav-status">ELLENŐRZÉS...</span>
+            </div>
+        </nav>
+    </div>
+
+    <main class="wrapper">
+        <!-- BENTO HERO SECTION -->
+        <section class="hero-section">
+            <div class="hero-bento">
+                
+                <!-- Bal oldali üdvözlő kártya -->
+                <div class="hero-card fade-up">
+                    <div>
+                        <div class="tag-row">
+                            <span class="pill-tag mono">TANULMÁNYI OSZTÁLY</span>
+                            <span class="mono" style="color: var(--red);">• A ÉPÜLET FÖLDSZINT</span>
+                        </div>
+                        <h1 class="hero-title serif">
+                            ISKOLA <br><em>Tanulmányi</em> Központ.
+                        </h1>
+                        <p class="hero-desc">
+                            Gyors személyes ügyintézés, diákigazolvány érvényesítés és hivatalos tanulói igazolások kiadása.
+                        </p>
+                    </div>
+
+                    <div class="hero-bottom">
+                        <a href="#nyitvatartas" class="cta-btn">
+                            <span>Ügyfélfogadási idők</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </a>
+                        <div class="mono" style="color: var(--red);">
+                            SORSZÁM: 01–04 ABLAK
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jobb oldali 3 képes interaktív harmonika-pakli (Photo Deck) -->
+                <div class="photo-deck fade-up" style="transition-delay: 0.12s;">
+                    <!-- 1. Kép -->
+                    <div class="deck-card active">
+                        <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1000&q=85" alt="Iskola központi épület">
+                        <div class="deck-overlay">
+                            <div class="deck-num mono">01</div>
+                            <div class="deck-info">
+                                <h3>Főépület & Aula</h3>
+                                <span class="mono">KÖZPONTI CAMPUS</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Kép -->
+                    <div class="deck-card">
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80" alt="Ügyfélfogadó pultok">
+                        <div class="deck-overlay">
+                            <div class="deck-num mono">02</div>
+                            <div class="deck-info">
+                                <h3>Ügyfélfogadó Tér</h3>
+                                <span class="mono">FÖLDSZINT 12. AJTÓ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Kép -->
+                    <div class="deck-card">
+                        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=80" alt="Diákügyintézés és konzultáció">
+                        <div class="deck-overlay">
+                            <div class="deck-num mono">03</div>
+                            <div class="deck-info">
+                                <h3>Diákigazolvány Pont</h3>
+                                <span class="mono">GYORSABLAK</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PIROS SZÍNPADI NYITVATARTÁS SZEKCIÓ -->
+        <section id="nyitvatartas" class="hours-stage-wrap">
+            <div class="hours-stage fade-up">
+                <div class="stage-top">
+                    <div class="stage-title-group">
+                        <span class="mono">● HETI ÜGYFÉLFOGADÁSI REND</span>
+                        <h2 class="stage-title serif">Nyitvatartás</h2>
+                    </div>
+                    <div class="stage-clock-box">
+                        <span class="mono" style="opacity: 0.75; font-size: 0.68rem;">HELYI IDŐ (BUDAPEST)</span>
+                        <span class="clock-time mono" id="live-clock">12:00:00</span>
+                    </div>
+                </div>
+
+                <!-- Napok kártya-rácsa -->
+                <div class="days-grid">
+                    <div class="day-card" data-day="1" data-open="8" data-close="16">
+                        <div class="day-card-top">
+                            <span class="day-label">Hétfő</span>
+                            <span class="today-chip mono">MA</span>
+                        </div>
+                        <div>
+                            <div class="day-hours mono">08:00 – 16:00</div>
+                            <div class="day-note">Teljes körű ügyintézés</div>
+                        </div>
+                    </div>
+
+                    <div class="day-card" data-day="2" data-open="8" data-close="16">
+                        <div class="day-card-top">
+                            <span class="day-label">Kedd</span>
+                            <span class="today-chip mono">MA</span>
+                        </div>
+                        <div>
+                            <div class="day-hours mono">08:00 – 16:00</div>
+                            <div class="day-note">Teljes körű ügyintézés</div>
+                        </div>
+                    </div>
+
+                    <div class="day-card" data-day="3" data-open="12" data-close="18">
+                        <div class="day-card-top">
+                            <span class="day-label">Szerda</span>
+                            <span class="today-chip mono">MA</span>
+                        </div>
+                        <div>
+                            <div class="day-hours mono">12:00 – 18:00</div>
+                            <div class="day-note">Hosszított ügyfélfogadás</div>
+                        </div>
+                    </div>
+
+                    <div class="day-card" data-day="4" data-open="8" data-close="16">
+                        <div class="day-card-top">
+                            <span class="day-label">Csütörtök</span>
+                            <span class="today-chip mono">MA</span>
+                        </div>
+                        <div>
+                            <div class="day-hours mono">08:00 – 16:00</div>
+                            <div class="day-note">Teljes körű ügyintézés</div>
+                        </div>
+                    </div>
+
+                    <div class="day-card" data-day="5" data-open="8" data-close="12">
+                        <div class="day-card-top">
+                            <span class="day-label">Péntek</span>
+                            <span class="today-chip mono">MA</span>
+                        </div>
+                        <div>
+                            <div class="day-hours mono">08:00 – 12:00</div>
+                            <div class="day-note">Igazolások és diákigazolvány</div>
+                        </div>
+                    </div>
+
+                    <div class="day-card weekend-card" data-day="6,0" data-open="0" data-close="0">
+                        <div class="day-card-top">
+                            <span class="day-label">Szombat & Vasárnap</span>
+                            <span class="today-chip mono">MA</span>
+                        </div>
+                        <div>
+                            <div class="day-hours mono">ZÁRVA</div>
+                            <div class="day-note">Hétvégén a személyes ügyfélfogadás szünetel</div>
+                        </div>
+                    </div>
+
+                    <div class="day-card" style="background: rgba(255,255,255,0.06); border-style: dotted;">
+                        <div class="day-card-top">
+                            <span class="mono" style="opacity: 0.75;">GYORS INFÓ</span>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.05rem; margin-bottom: 0.35rem;">Ebédszünet</div>
+                            <div class="day-note">12:00 és 12:30 között csökkentett ablakkal üzemelünk.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KÁRTYÁS GYAKORI KÉRDÉSEK (FAQ) -->
+        <section id="kerdesek" class="faq-section">
+            <div class="faq-header fade-up">
+                <span class="pill-tag mono">TUDNIVALÓK</span>
+                <h2 class="serif">Gyakori Kérdések</h2>
+            </div>
+
+            <div class="faq-bento fade-up">
+                <!-- 1. Kérdés -->
+                <div class="faq-card open">
+                    <button class="faq-btn">
+                        <span class="faq-num mono">01</span>
+                        <span class="faq-q-text">Hogyan kérhetek tanulói jogviszony-igazolást?</span>
+                        <span class="faq-plus">+</span>
+                    </button>
+                    <div class="faq-body-wrap">
+                        <div class="faq-body">
+                            <p>Személyesen a Tanulmányi Osztály bármelyik ablakánál azonnal kiállítjuk és lepecsételjük, amennyiben bemutatod a személyi igazolványodat.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Kérdés -->
+                <div class="faq-card">
+                    <button class="faq-btn">
+                        <span class="faq-num mono">02</span>
+                        <span class="faq-q-text">Mikor vehető át az új diákigazolvány matrica?</span>
+                        <span class="faq-plus">+</span>
+                    </button>
+                    <div class="faq-body-wrap">
+                        <div class="faq-body">
+                            <p>A féléves érvényesítő matricák szeptember 1-től és február 1-től vehetők át a 3-as és 4-es gyorsablaknál, sorban állás nélkül.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Kérdés -->
+                <div class="faq-card">
+                    <button class="faq-btn">
+                        <span class="faq-num mono">03</span>
+                        <span class="faq-q-text">Kell-e előre időpontot foglalni az ügyintézéshez?</span>
+                        <span class="faq-plus">+</span>
+                    </button>
+                    <div class="faq-body-wrap">
+                        <div class="faq-body">
+                            <p>Időpontfoglalás nem szükséges. Az érkezési sorrendet a bejáratnál található érintőképernyős sorszámosztó automata biztosítja.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Kérdés -->
+                <div class="faq-card">
+                    <button class="faq-btn">
+                        <span class="faq-num mono">04</span>
+                        <span class="faq-q-text">Szülő vagy meghatalmazott átveheti az iratokat?</span>
+                        <span class="faq-plus">+</span>
+                    </button>
+                    <div class="faq-body-wrap">
+                        <div class="faq-body">
+                            <p>Igen, két tanúval hitelesített írásos meghatalmazással közeli hozzátartozó is eljárhat a tanuló nevében.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- LÁBLÉC -->
+    <footer class="wrapper">
+        <div class="footer-pill">
+            <div class="footer-left">
+                <span class="nav-dot"></span>
+                <span>ISKOLA — TANULMÁNYI OSZTÁLY</span>
+            </div>
+            <div class="mono" style="color: var(--red-dark); opacity: 0.7;">© 2026 MINDEN JOG FENNTARTVA</div>
+            <button class="cookie-reopen mono" id="reopen-cookies">Süti (Cookie) beállítások</button>
+        </div>
+    </footer>
+
+    <!-- LEBEGŐ COOKIE (SÜTI) ABLAK -->
+    <div class="cookie-modal" id="cookie-modal" role="dialog" aria-label="Süti tájékoztató">
+        <div class="cookie-icon-badge mono">C</div>
+        <div class="cookie-text">
+            <h4>Sütik (Cookies) használata</h4>
+            <p>Az Iskola weboldala sütiket használ a zavartalan működéshez és a beállításaid megjegyzéséhez.</p>
+        </div>
+        <div class="cookie-btns">
+            <button class="c-btn c-btn-accept" id="cookie-accept">Elfogadom</button>
+            <button class="c-btn c-btn-decline" id="cookie-decline">Csak alapvető</button>
+        </div>
+    </div>
+
+    <!-- BEÉPÍTETT JAVASCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // 1. INTERAKTÍV 3 KÉPES FOTÓ-PAKLI (Hoverre és kattintásra is kinyílik)
+            const deckCards = document.querySelectorAll('.deck-card');
+            deckCards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    deckCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                });
+                card.addEventListener('click', () => {
+                    deckCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                });
+            });
+
+            // 2. ÉLŐ ÓRA ÉS AUTOMATIKUS MAI NAP KIEMELÉSE
+            const navStatus = document.getElementById('nav-status');
+            const liveClock = document.getElementById('live-clock');
+            const dayCards = document.querySelectorAll('.day-card[data-day]');
+
+            function updateTimeAndStatus() {
+                const now = new Date();
+                const day = now.getDay(); // 0 = Vasárnap, 1 = Hétfő...
+                const hours = now.getHours();
+                
+                // Élő digitális óra frissítése
+                liveClock.textContent = now.toLocaleTimeString('hu-HU');
+
+                dayCards.forEach(card => {
+                    const daysAttr = card.getAttribute('data-day').split(',').map(Number);
+                    if (daysAttr.includes(day)) {
+                        card.classList.add('is-today');
+                        const openH = parseInt(card.getAttribute('data-open'), 10);
+                        const closeH = parseInt(card.getAttribute('data-close'), 10);
+
+                        if (openH > 0 && hours >= openH && hours < closeH) {
+                            navStatus.textContent = `MA NYITVA • ${closeH}:00-IG`;
+                        } else {
+                            navStatus.textContent = 'JELENLEG ZÁRVA';
+                        }
+                    }
+                });
+            }
+
+            updateTimeAndStatus();
+            setInterval(updateTimeAndStatus, 1000);
+
+            // 3. KÁRTYÁS GYIK (FAQ) NYITÁS / ZÁRÁS
+            const faqCards = document.querySelectorAll('.faq-card');
+            faqCards.forEach(card => {
+                const btn = card.querySelector('.faq-btn');
+                btn.addEventListener('click', () => {
+                    const isOpen = card.classList.contains('open');
+                    faqCards.forEach(c => c.classList.remove('open'));
+                    if (!isOpen) {
+                        card.classList.add('open');
+                    }
+                });
+            });
+
+            // 4. GÖRGETÉSI ANIMÁCIÓ (Intersection Observer)
+            const fadeElements = document.querySelectorAll('.fade-up');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12 });
+
+            fadeElements.forEach(el => observer.observe(el));
+
+            // 5. SÜTI (COOKIE) KEZELÉS
+            const cookieModal = document.getElementById('cookie-modal');
+            const acceptBtn = document.getElementById('cookie-accept');
+            const declineBtn = document.getElementById('cookie-decline');
+            const reopenBtn = document.getElementById('reopen-cookies');
+            const STORAGE_KEY = 'iskola_tanulmanyi_cookie_v2';
+
+            if (!localStorage.getItem(STORAGE_KEY)) {
+                setTimeout(() => {
+                    cookieModal.classList.add('visible');
+                }, 600);
+            }
+
+            function closeCookie(choice) {
+                localStorage.setItem(STORAGE_KEY, choice);
+                cookieModal.classList.remove('visible');
+            }
+
+            acceptBtn.addEventListener('click', () => closeCookie('accepted'));
+            declineBtn.addEventListener('click', () => closeCookie('essential'));
+
+            reopenBtn.addEventListener('click', () => {
+                localStorage.removeItem(STORAGE_KEY);
+                cookieModal.classList.add('visible');
+            });
+        });
+    </script>
+</body>
+</html>
